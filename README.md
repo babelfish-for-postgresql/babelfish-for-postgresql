@@ -1,32 +1,52 @@
-## Babelfish for PostgreSQL
 
-[![Build Status](https://github.com/babelfish-for-postgresql/babelfish_extensions/workflows/CI/badge.svg)](https://github.com/babelfish-for-postgresql/babelfish_extensions/actions?query=workflow%3A%22CI%22)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE.Apache2)
-[![License: PostgreSQL](https://img.shields.io/badge/license-PostgreSQL-blue.svg)](LICENSE.PostgreSQL)
+# Babelfish for PostgreSQL
 
-Babelfish adds additional syntax, functions, data types, and more to PostgreSQL
-to help in the migration from SQL Server. This repository contains the four
-extensions that comprise Babelfish. Note that these extensions depend on
-patches to community PostgreSQL. A repository of those modifications can be
-found [here](https://github.com/babelfish-for-postgresql/postgresql_modified_for_babelfish).
+Babelfish for PostgreSQL is an open-source project that adds a Microsoft
+SQL Server-compatible end-point to PostgreSQL. Babelfish allows PostgreSQL to
+understand T-SQL, SQL Server’s proprietary SQL dialect, and supports the TDS
+communication protocol, so applications originally written for SQL Server may
+work with PostgreSQL with fewer code changes and without changing database
+drivers.
 
-Build instructions can be found [here](https://github.com/babelfish-for-postgresql/babelfish_extensions/blob/BABEL_1_X_DEV/contrib/README.md).
- 
-More information about Babelfish can be found at [babelfishpg.org](https://babelfishpg.org).
+This repository contains the release distributions for the Babelfish project.
+Each distribution contains the source code for Babelfish as well as the
+corresponding PostgreSQL version and some prerequisite software.
 
-Babelfish would not be possible without the work and dedication of the hundreds
-of people who have contributed to creation of PostgreSQL itself.
+Additional Github repositories contain:
 
-The `babelfishpg_money` extension is a modified version of EDB / 2ndQuadrant's
-[fixeddecimal](https://github.com/2ndQuadrant/fixeddecimal) data type. Everyone
-involved in the development of PostgreSQL and fixeddecimal has our gratitude.
- 
-## Security
- 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
- 
-## License
+- [Babelfish project source code](https://github.com/babelfish-for-postgresql/babelfish_extensions).
+- [PostgreSQL source code](https://github.com/babelfish-for-postgresql/postgresql_modified_for_babelfish)
+  that has been modified for use with Babelfish.
+- [The Babelfish website](https://github.com/babelfish-for-postgresql/babelfish_project_website)
+  source and build information.
+- [Babelfish Compass](https://github.com/babelfish-for-postgresql/babelfish_compass) is a
+  tool that helps you evaluate Babelfish compatibility for your database.
+  Source code and documentation are available from the Github repo.
 
-This project is dual licensed under [Apache-2.0](LICENSE.Apache2) and
-[PostgreSQL community](LICENSE.PostgreSQL) licenses. Use is permitted under
-either license.
+The Babelfish project welcomes contributions to the project source code and the
+website - review the [Guidelines for contributing code or
+documentation](https://babelfishpg.org/docs/contributing/) to learn more.  We
+also invite your feedback:
+
+- about new content,
+- to remove or report inaccuracies,
+- to fill information gaps,
+- to fix typos or grammatical errors, and
+- to improve clarity.
+
+To review online documentation for Babelfish, visit the [babelfishpg.org](https://babelfishpg.org/) website.
+
+Babelfish for PostgreSQL is available as open-source software and can be
+downloaded from Github for free under the terms of the
+[Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0) and the
+[PostgreSQL license](https://www.postgresql.org/about/licence/).
+
+## Credits
+
+Babelfish would not be possible without the hard work and dedication of the
+people who have contributed to PostgreSQL. Everyone involved in the development
+of PostgreSQL has our gratitude.
+
+Copyright Babelfish for PostgreSQL Contributors.
+
+
