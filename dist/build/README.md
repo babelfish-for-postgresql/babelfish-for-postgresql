@@ -1,7 +1,7 @@
 # Building tarballs
 
 The `build.sh` script will output the tarballs into the `/tmp/build` folder, and
-output their paths.
+output their paths. The output is in zip and tar.gz.
 
 If you have the link for the releases notes, you can export the below variable
 before the build execution:
