@@ -5,7 +5,7 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 OUTDIR=/tmp/build
 
 TAG=${TAG:-BABEL_2_1_0__PG_14_3}
-EXTTAG=${EXTAG:-BABEL_2_1_0}
+EXTTAG=${EXTTAG:-BABEL_2_1_0}
 
 VERSION=$(echo $TAG | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')
 
