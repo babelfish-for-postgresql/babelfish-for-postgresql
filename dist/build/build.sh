@@ -4,11 +4,27 @@
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 OUTDIR=/tmp/build
 
-TAG=${TAG:-BABEL_2_1_0__PG_14_3}
-EXTTAG=${EXTTAG:-BABEL_2_1_0}
+function help(){
+  echo "
+    Export the following environment variables: TAG, EXTTAG, RELEASE_NOTES_LINK
+    Then, execute: ./build.sh
+  "
+  exit 0
+}
+
+if [ ! -v TAG ]
+then
+    printf "TAG is a mandatory environment variable.\n"
+    exit 2
+fi
+
+if [ ! -v EXTTAG ]
+then
+    printf "EXTTAG is a  environment variable.\n"
+    exit 2
+fi
 
 VERSION=$(echo $TAG | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')
-
 
 function helper() {
   sed -r -e 's/\{\{VERSION\}\}/'''$VERSION'''/'  $1
@@ -39,7 +55,7 @@ cp -r ${TAG}-babelfish-extensions/contrib/babelfishpg_* ${TAG}/contrib
 cd ${TAG}
 rm -rf .git/
 
-if [ -n RELEASE_NOTES_LINK ]; then
+if [ -v RELEASE_NOTES_LINK ]; then
   wget -O RELEASE_NOTES.md ${RELEASE_NOTES_LINK}
 fi
 
