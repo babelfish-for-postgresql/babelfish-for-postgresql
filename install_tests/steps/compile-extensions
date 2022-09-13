@@ -1,0 +1,20 @@
+#!/bin/sh
+# Install babelfishpg_money extension
+cd contrib/babelfishpg_money
+make
+make install
+
+# Install babelfishpg_common extension
+cd ../babelfishpg_common
+make 
+make install
+
+# Install babelfishpg_tds extension
+cd ../babelfishpg_tds
+make 
+make install
+
+# Installs the babelfishpg_tsql extension
+cd ../babelfishpg_tsql
+make 
+make install

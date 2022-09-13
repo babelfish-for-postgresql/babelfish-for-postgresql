@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo chown -R johndoe:johndoe /usr/local/pgsql-13.4
