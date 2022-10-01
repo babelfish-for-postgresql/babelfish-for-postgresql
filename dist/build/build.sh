@@ -1,8 +1,9 @@
 #!/bin/bash
 
-
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 OUTDIR=/tmp/build
+ENG_URL="https://github.com/babelfish-for-postgresql/postgresql_modified_for_babelfish.git"
+EXT_URL="https://github.com/babelfish-for-postgresql/babelfish_extensions.git"
 
 function help(){
   echo "
@@ -24,6 +25,12 @@ then
     exit 2
 fi
 
+if [ ! -v RELEASE_NOTES_LINK ]
+then
+    printf "RELEASE_NOTES_LINK is a  environment variable with the raw release notes content.\n"
+    exit 2
+fi
+
 VERSION=$(echo $TAG | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')
 
 function helper() {
@@ -36,18 +43,8 @@ mkdir -p $OUTDIR 2> /dev/null
 
 cd ${OUTDIR}
 
-git clone https://github.com/babelfish-for-postgresql/postgresql_modified_for_babelfish.git ${TAG}
-git clone https://github.com/babelfish-for-postgresql/babelfish_extensions.git ${TAG}-babelfish-extensions
-
-
-cd ${TAG}
-git remote add ${TAG}_remote git@github.com:ongres/${TAG}.git
-git checkout tags/${TAG}
-cd ${OUTDIR} 
-
-cd ${TAG}-babelfish-extensions
-git checkout tags/${EXTTAG}
-cd ${OUTDIR}
+git clone --single-branch -b ${TAG}     ${ENG_URL} ${TAG}
+git clone --single-branch -b ${EXTTAG}  ${EXT_URL} ${TAG}-babelfish-extensions
 
 cp -r ${TAG}-babelfish-extensions/test ${TAG}/contrib 
 cp -r ${TAG}-babelfish-extensions/contrib/babelfishpg_* ${TAG}/contrib 
