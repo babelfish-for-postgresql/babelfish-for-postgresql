@@ -1,0 +1,76 @@
+
+name: Verify and Create Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      engine_tag:
+        description: 'Engine tag'
+        required: true
+      ext_tag:
+        description: 'Extension tag'
+        required: true
+
+
+jobs:
+  generate_tarballs:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      id: checkout
+     
+    - name: Generate tarballs 
+      id: generate-tarballs
+      run: |
+        export TAG=${{ github.event.inputs.engine_tag }}
+        export EXTTAG=${{ github.event.inputs.ext_tag }}
+        bash ./.github/scripts/build.sh
+
+      shell: bash
+    - uses: actions/upload-artifact@v3
+      with:
+        name: zip
+        path: |
+          /tmp/build/${{ github.event.inputs.engine_tag }}.zip
+    - uses: actions/upload-artifact@v3
+      with:
+        name: tar
+        path: |
+         /tmp/build/${{ github.event.inputs.engine_tag }}.tar.gz
+
+  verify_zip:
+    needs: generate_tarballs
+    uses: ./.github/workflows/install-and-verify.yml
+    with:
+      file_type: zip
+
+  verify_tar:
+    needs: generate_tarballs
+    uses: ./.github/workflows/install-and-verify.yml
+    with:
+      file_type: tar
+  
+  release:
+    needs: [verify_zip, verify_tar]
+    if: always() && ${{ needs.verify_zip.outputs.result }} == 0 && ${{ needs.verify_tar.outputs.result }} == 0
+    runs-on: ubuntu-20.04
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_PRIVATE_KEY }}
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: zip
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: tar
+
+      - name: Release 
+        run: |
+          export TAG=${{ github.event.inputs.engine_tag }}
+          export LOC=$(pwd)/
+          bash ./.github/scripts/release.sh
+        shell: bash

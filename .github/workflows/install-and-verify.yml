@@ -1,0 +1,149 @@
+name: 'Install and Verify'
+
+on: 
+  workflow_call:
+    inputs:
+      file_type:
+        type: string
+        required: true
+    outputs:
+      result:
+        value: ${{ jobs.install-and-verify.outputs.result }}
+
+jobs:
+  install-and-verify:
+    runs-on: ubuntu-20.04
+    outputs:
+      result: ${{ steps.verify-babelfish-version.outputs.result }}
+    env:
+      JOBS: 4 # Adjust to number of cores
+    steps:
+      - uses: actions/checkout@v3
+        id: checkout
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{inputs.file_type}}
+
+      - name: Extract from zip
+        if: ${{inputs.file_type == 'zip'}}
+        run: unzip ${{ github.event.inputs.engine_tag }}.zip
+      
+      - name: Extract from tar
+        if: ${{inputs.file_type == 'tar'}}
+        run: tar -xf  ${{ github.event.inputs.engine_tag }}.tar.gz
+    
+      - name: Extract version
+        run: echo "VERSION=$(echo ${{ github.event.inputs.engine_tag }} | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set Environment Variables
+        run: |
+          echo "BABELFISH_HOME=$(pwd)/babelfish/${{env.VERSION}}"  >> $GITHUB_ENV
+          echo "PG_CONFIG=$(pwd)/babelfish/${{env.VERSION}}/bin/pg_config" >> $GITHUB_ENV
+          echo "PG_SRC=$(pwd)/${{ github.event.inputs.engine_tag }}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Install Dependencies
+        id: install-dependencies
+        if: always()
+        run: |
+          sudo apt-get update && sudo apt install -y --no-install-recommends \
+            build-essential flex libxml2-dev libxml2-utils \
+            libxslt-dev libssl-dev libreadline-dev zlib1g-dev \
+            libldap2-dev libpam0g-dev gettext uuid uuid-dev \
+            cmake lld apt-utils libossp-uuid-dev gnulib bison \
+            xsltproc icu-devtools libicu66 \
+            libicu-dev gawk \
+            curl openjdk-8-jre openssl \
+            g++ libssl-dev python-dev libpq-dev \
+            pkg-config libutfcpp-dev \
+            gnupg unixodbc-dev net-tools unzip \
+            freetds-bin freetds-common
+        shell: bash
+
+      - name: Compile ANTLR
+        id: compile-antlr
+        if: always() && steps.install-dependencies.outcome == 'success'
+        uses: ./.github/composite-actions/compile-antlr
+
+      - name: Build Modified Postgres
+        id: build-modified-postgres
+        if: always() && steps.compile-antlr.outcome == 'success'
+        uses: ./.github/composite-actions/build-modified-postgres
+
+      - name: Compile the ANTLR parser generator
+        id: compile-parser-generator
+        if: always() && steps.build-modified-postgres.outcome == 'success'
+        run: |
+          ANTLR_VERSION=4.9.3
+          export cmake=$(which cmake)
+          export ANTLR4_JAVA_BIN=/usr/bin/java
+          export ANTLR_EXECUTABLE=/usr/local/lib/antlr-${ANTLR_VERSION}-complete.jar
+          sudo cp /usr/local/lib/libantlr4-runtime.so.${ANTLR_VERSION} ${BABELFISH_HOME}/lib
+          cd ${{ github.event.inputs.engine_tag }}/contrib/babelfishpg_tsql/antlr
+          cmake -Wno-dev .
+          make all
+        shell: bash
+
+      - name: Build Extensions
+        id: build-extensions
+        if: always() && steps.compile-parser-generator.outcome == 'success'
+        uses: ./.github/composite-actions/build-extensions
+      
+      - name: Setup the Babelfish Extension
+        id: setup-babelfish-extension
+        if: always() && steps.build-extensions.outcome == 'success'
+        run: |
+          sudo chown -R runner: ${{env.BABELFISH_HOME}}
+          sudo su - runner
+          export BABELFISH_HOME=${{env.BABELFISH_HOME}}
+          export BABELFISH_DATA=${BABELFISH_HOME}/data
+          ${BABELFISH_HOME}/bin/initdb -D ${BABELFISH_DATA}/ -E "UTF8"
+          
+          cat << EOF >> ${BABELFISH_DATA}/postgresql.conf
+          #------------------------------------------------------------------------------
+          # BABELFISH RELATED OPTIONS
+          # These are going to step over previous duplicated variables.
+          #------------------------------------------------------------------------------
+          listen_addresses = '*'
+          allow_system_table_mods = on
+          shared_preload_libraries = 'babelfishpg_tds'
+          babelfishpg_tds.listen_addresses = '*'
+          EOF
+
+          ${BABELFISH_HOME}/bin/pg_ctl -D ${BABELFISH_DATA}/ -l logfile start
+          ${BABELFISH_HOME}/bin/psql -d postgres -U runner -c "CREATE USER babelfish_user WITH SUPERUSER CREATEDB CREATEROLE PASSWORD '12345678' INHERIT;"
+          ${BABELFISH_HOME}/bin/psql -d postgres -U runner -c "DROP DATABASE IF EXISTS babelfish_db;"
+          ${BABELFISH_HOME}/bin/psql -d postgres -U runner -c "CREATE DATABASE babelfish_db OWNER babelfish_user;"
+          ${BABELFISH_HOME}/bin/psql -d babelfish_db -U runner -c "CREATE EXTENSION IF NOT EXISTS "babelfishpg_tds" CASCADE;"
+          ${BABELFISH_HOME}/bin/psql -d babelfish_db -U runner -c "GRANT ALL ON SCHEMA sys to babelfish_user;"
+          ${BABELFISH_HOME}/bin/psql -d babelfish_db -U runner -c "ALTER USER babelfish_user CREATEDB;"
+          ${BABELFISH_HOME}/bin/psql -d babelfish_db -U runner -c "ALTER SYSTEM SET babelfishpg_tsql.database_name = 'babelfish_db';"
+          ${BABELFISH_HOME}/bin/psql -d babelfish_db -U runner -c "SELECT pg_reload_conf();"
+          ${BABELFISH_HOME}/bin/psql -d babelfish_db -U runner -c "CALL sys.initialize_babelfish('babelfish_user');"
+          exit
+        shell: bash
+
+      - name: Get Engine Version
+        id: verify-engine
+        if: always() && steps.setup-babelfish-extension.outcome == 'success'
+        run: |
+          tsql -H localhost -U babelfish_user -p 1433  -P 12345678 -D master << EOF
+          SELECT @@VERSION
+          GO
+          exit
+          EOF
+        shell: bash
+      
+      - name: Verify Babelfish Version
+        id: verify-babelfish-version
+        if: always() && steps.setup-babelfish-extension.outcome == 'success'
+        run: |
+          tsql -H localhost -U babelfish_user -p 1433  -P 12345678 -D master << EOF | grep ${{env.VERSION}} ; echo "result=$?" >> $GITHUB_OUTPUT
+          SELECT serverproperty('BabelfishVersion')
+          GO
+          exit
+          EOF
+        shell: bash
+
