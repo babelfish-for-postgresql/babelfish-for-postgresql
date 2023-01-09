@@ -1,0 +1,14 @@
+name: 'Build Modified Postgres'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build Modified Postgres
+      id: build-modified-postgres
+      run: |
+        cd ${{ env.PG_SRC }}
+        ./configure --prefix=${{env.BABELFISH_HOME}}/ CFLAGS="-ggdb" --enable-debug --with-ldap --with-libxml --with-pam  --with-uuid=ossp  --enable-nls --with-libxslt --with-icu
+        make DESTDIR=${{env.BABELFISH_HOME}} -j $JOBS 2>error.txt
+        sudo make install
+        cd contrib && make -j ${JOBS} && sudo make install
+      shell: bash

@@ -1,0 +1,20 @@
+name: 'Build Extension'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build Extension
+      run: |
+        export PG_CONFIG=${{env.PG_CONFIG}}
+        export PG_SRC=${{env.PG_SRC}}
+        export cmake=$(which cmake)
+        pwd
+        cd ${{env.PG_SRC}}/contrib
+        for ext in babelfishpg_common babelfishpg_money babelfishpg_tds babelfishpg_tsql 
+        do
+            cd $ext
+            make -j ${JOBS}
+            sudo make PG_CONFIG=${{env.PG_CONFIG}} install
+            cd ..
+        done
+      shell: bash
