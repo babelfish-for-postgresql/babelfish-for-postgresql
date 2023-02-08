@@ -29,8 +29,7 @@ ENGINE=$(echo $TAG | sed -r -e 's/BABEL_([0-9_]*)__PG_([0-9]+_)/\2/' -e 's/_/./g
 EXT_STABLE_BRANCH=$(echo $TAG | sed -r -e 's/([0-9a-z_]*)_.__PG.*/\1/' -e 's/$/_STABLE/')
 
 function helper() {
-  sed -r -e 's/\{\{VERSION\}\}/'''$VERSION'''/'  $1
-  sed -r -e 's/\{\{ENGINE\}\}/'''$ENGINE'''/'  $1
+  sed -r -e 's/\{\{VERSION\}\}/'''$VERSION'''/' -e 's/\{\{ENGINE\}\}/'''$ENGINE'''/' $1
 }
 
 rm -rf ${OUTDIR}
