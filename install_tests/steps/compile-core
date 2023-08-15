@@ -1,0 +1,11 @@
+#!/bin/sh
+make            # Compiles the Babefish for PostgreSQL engine
+cd contrib 
+
+make            # Compiles the PostgreSQL default extensions
+cd ..
+
+make install    # Installs the Babelfish for PostgreSQL engine
+cd contrib
+
+make install    # Installs the PostgreSQL default extensions

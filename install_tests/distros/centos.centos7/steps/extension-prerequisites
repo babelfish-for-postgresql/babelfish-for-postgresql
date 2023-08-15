@@ -1,0 +1,7 @@
+#!/bin/sh
+sudo yum install -y java unzip curl git
+sudo yum install -y http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm
+sudo yum install -y cmake3 libuuid-devel
+
+
+ln -s /usr/bin/cmake3 /usr/bin/cmake

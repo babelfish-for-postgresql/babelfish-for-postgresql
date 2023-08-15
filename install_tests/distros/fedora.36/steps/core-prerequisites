@@ -1,0 +1,6 @@
+#!/bin/sh
+sudo dnf install -y gcc gcc-c++ kernel-devel make
+sudo dnf install -y bison flex libxml2-devel readline-devel zlib-devel
+sudo dnf install -y uuid-devel pkg-config openssl-devel
+sudo dnf install -y libicu-devel postgresql-devel perl
+sudo dnf install -y wget

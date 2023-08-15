@@ -1,0 +1,3 @@
+#!/bin/sh
+sudo dnf install -y java unzip curl git
+sudo dnf install -y cmake libuuid-devel
