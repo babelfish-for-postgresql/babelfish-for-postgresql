@@ -173,4 +173,10 @@ will be stored under `idx1tab1645826a2684a0937f93b08935f31319f` "unique" name an
 
 When the specified index name is longer than 63 characters, then the transformed "unique" name above also will appear longer than 63 characters and will be shortened-with-hash using the rules described in previous sections. Resulting "short" name won't contain the full original name.
 
+Resulting "short" name can be computed from original name and a table name using the folowing query:
+
+```tsql
+select sys.babelfish_truncate_identifier('<index_name>' + '<table_name>' + md5('<index_name>'))
+```
+
 Constraint names in PostgreSQL, in general, only require to be unique withing the table (or domain) they are defined on. But there is an exception for constraints that are implemented by an index (primary key, unique and exclusion constraints). In this case the index that implements the constraint must have the same name as the constraint itself. Because of this Babelfish handles names of all constraints the same way as index names.
