@@ -18,10 +18,10 @@ jobs:
     env:
       JOBS: 4 # Adjust to number of cores
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         id: checkout
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: ${{inputs.file_type}}
 

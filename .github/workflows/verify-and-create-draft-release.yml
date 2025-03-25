@@ -16,7 +16,7 @@ jobs:
   generate_tarballs:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       id: checkout
      
     - name: Generate tarballs 
@@ -27,12 +27,12 @@ jobs:
         bash ./.github/scripts/build.sh
 
       shell: bash
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: zip
         path: |
           /tmp/build/${{ github.event.inputs.engine_tag }}.zip
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: tar
         path: |
@@ -58,13 +58,13 @@ jobs:
       GH_TOKEN: ${{ secrets.RELEASE_PRIVATE_KEY }}
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: zip
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: tar
 
