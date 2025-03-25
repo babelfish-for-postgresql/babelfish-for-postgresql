@@ -1,0 +1,3 @@
+#!/bin/sh
+sudo su postgres
+$INSTALLATION_PATH/bin/initdb -D /usr/local/pgsql/data
