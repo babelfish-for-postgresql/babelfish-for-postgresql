@@ -14,7 +14,7 @@ on:
 
 jobs:
   generate_tarballs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
       id: checkout
@@ -53,7 +53,7 @@ jobs:
   release:
     needs: [verify_zip, verify_tar]
     if: always() && ${{ needs.verify_zip.outputs.result }} == 0 && ${{ needs.verify_tar.outputs.result }} == 0
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       GH_TOKEN: ${{ secrets.RELEASE_PRIVATE_KEY }}
     steps:
