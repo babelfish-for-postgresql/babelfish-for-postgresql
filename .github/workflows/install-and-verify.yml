@@ -53,10 +53,10 @@ jobs:
             libxslt-dev libssl-dev libreadline-dev zlib1g-dev \
             libldap2-dev libpam0g-dev gettext uuid uuid-dev \
             cmake lld apt-utils libossp-uuid-dev gnulib bison \
-            xsltproc icu-devtools libicu66 \
+            xsltproc icu-devtools libicu70 \
             libicu-dev gawk \
             curl openjdk-8-jre openssl \
-            g++ libssl-dev python-dev libpq-dev \
+            g++ libssl-dev python3-dev libpq-dev \
             pkg-config libutfcpp-dev \
             gnupg unixodbc-dev net-tools unzip \
             freetds-bin freetds-common
@@ -76,7 +76,7 @@ jobs:
         id: compile-parser-generator
         if: always() && steps.build-modified-postgres.outcome == 'success'
         run: |
-          ANTLR_VERSION=4.9.3
+          ANTLR_VERSION=4.13.2
           export cmake=$(which cmake)
           export ANTLR4_JAVA_BIN=/usr/bin/java
           export ANTLR_EXECUTABLE=/usr/local/lib/antlr-${ANTLR_VERSION}-complete.jar
