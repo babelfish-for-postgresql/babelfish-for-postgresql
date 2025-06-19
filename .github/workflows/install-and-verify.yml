@@ -12,7 +12,7 @@ on:
 
 jobs:
   install-and-verify:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       result: ${{ steps.verify-babelfish-version.outputs.result }}
     env:
