@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo cp /usr/local/lib/libantlr4-runtime.so.4.9.2 "$INSTALLATION_PATH/lib"

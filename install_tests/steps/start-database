@@ -1,0 +1,2 @@
+#!/bin/sh
+$INSTALLATION_PATH/bin/pg_ctl -D /usr/local/pgsql/data start
