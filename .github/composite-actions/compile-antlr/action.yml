@@ -6,15 +6,14 @@ runs:
     - name: Compile ANTLR
       id: compile-antlr
       run: |
-        ANTLR_VERSION=4.13.2
         cd ${{ env.PG_SRC }}/contrib/babelfishpg_tsql/antlr/thirdparty/antlr/
-        sudo cp "antlr-$ANTLR_VERSION-complete.jar" /usr/local/lib
+        sudo cp "antlr-${{env.ANTLR_VERSION}}-complete.jar" /usr/local/lib
         cd ..
-        wget "http://www.antlr.org/download/antlr4-cpp-runtime-$ANTLR_VERSION-source.zip"
-        unzip -d antlr4 "antlr4-cpp-runtime-$ANTLR_VERSION-source.zip"
+        wget "http://www.antlr.org/download/antlr4-cpp-runtime-${{env.ANTLR_VERSION}}-source.zip"
+        unzip -d antlr4 "antlr4-cpp-runtime-${{env.ANTLR_VERSION}}-source.zip"
         cd antlr4
         mkdir build && cd build 
-        cmake .. -D ANTLR_JAR_LOCATION=/usr/local/lib/antlr-${ANTLR_VERSION}-complete.jar -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_DEMO=True
+        cmake .. -D ANTLR_JAR_LOCATION=/usr/local/lib/antlr-${{env.ANTLR_VERSION}}-complete.jar -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_DEMO=True
         make -j $JOBS 
         sudo make install
       shell: bash
