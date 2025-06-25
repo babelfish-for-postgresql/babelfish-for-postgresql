@@ -75,7 +75,7 @@ jobs:
         if: always()
         run: |
           sudo apt-get update && sudo apt install -y --no-install-recommends \
-            build-essential gcc-9 g++-9 flex libxml2-dev libxml2-utils \
+            build-essential flex libxml2-dev libxml2-utils \
             libxslt-dev libssl-dev libreadline-dev zlib1g-dev \
             libldap2-dev libpam0g-dev gettext uuid uuid-dev \
             cmake lld apt-utils libossp-uuid-dev gnulib bison \
