@@ -42,6 +42,32 @@ jobs:
           echo "BABELFISH_HOME=$(pwd)/babelfish/${{env.VERSION}}"  >> $GITHUB_ENV
           echo "PG_CONFIG=$(pwd)/babelfish/${{env.VERSION}}/bin/pg_config" >> $GITHUB_ENV
           echo "PG_SRC=$(pwd)/${{ github.event.inputs.engine_tag }}" >> $GITHUB_ENV
+          echo "MAJOR_VERSION=$(echo ${{env.VERSION}} | cut -d. -f1)" >> $GITHUB_ENV
+          echo "MINOR_VERSION=$(echo ${{env.VERSION}} | cut -d. -f2)" >> $GITHUB_ENV
+
+        shell: bash
+
+      - name: Set GCC and JDK version
+        run: |
+          if [[ "${{env.MAJOR_VERSION}}" -le 3 ]]; then
+            echo "ANTLR_VERSION=4.9.3" >> $GITHUB_ENV
+            echo "JDK_VERSION=openjdk-8-jre" >> $GITHUB_ENV
+          else
+            echo "ANTLR_VERSION=4.13.2" >> $GITHUB_ENV
+            echo "JDK_VERSION=openjdk-21-jre" >> $GITHUB_ENV
+          fi
+
+          # Set GCC_VERSION based on version thresholds
+          echo "Major version : ${{env.MAJOR_VERSION}},  Minor version : ${{env.MINOR_VERSION}}"
+          if [[ "${{env.MAJOR_VERSION}}" -eq 5 && "${{env.MINOR_VERSION}}" -le 1 ]] ||
+            [[ "${{env.MAJOR_VERSION}}" -eq 4 && "${{env.MINOR_VERSION}}" -le 5 ]] ||
+            [[ "${{env.MAJOR_VERSION}}" -eq 3 && "${{env.MINOR_VERSION}}" -le 9 ]] ||
+            [[ "${{env.MAJOR_VERSION}}" -eq 2 && "${{env.MINOR_VERSION}}" -le 12 ]]; then
+            echo "GCC_VERSION=GCC-9" >> $GITHUB_ENV
+          else
+            echo "GCC_VERSION=GCC-default" >> $GITHUB_ENV
+          fi
+
         shell: bash
 
       - name: Install Dependencies
@@ -53,13 +79,21 @@ jobs:
             libxslt-dev libssl-dev libreadline-dev zlib1g-dev \
             libldap2-dev libpam0g-dev gettext uuid uuid-dev \
             cmake lld apt-utils libossp-uuid-dev gnulib bison \
-            xsltproc icu-devtools libicu66 \
+            xsltproc icu-devtools libicu70 \
             libicu-dev gawk \
-            curl openjdk-8-jre openssl \
-            g++ libssl-dev python-dev libpq-dev \
+            curl openssl \
+            g++ libssl-dev python3-dev libpq-dev \
             pkg-config libutfcpp-dev \
             gnupg unixodbc-dev net-tools unzip \
-            freetds-bin freetds-common
+            freetds-bin freetds-common $JDK_VERSION
+
+          if [[ "$GCC_VERSION" -eq GCC-9 ]]; then
+            echo "installing gcc version 9"
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
+            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+          else
+            echo "keep default gcc version"
+          fi
         shell: bash
 
       - name: Compile ANTLR
@@ -76,11 +110,10 @@ jobs:
         id: compile-parser-generator
         if: always() && steps.build-modified-postgres.outcome == 'success'
         run: |
-          ANTLR_VERSION=4.9.3
           export cmake=$(which cmake)
           export ANTLR4_JAVA_BIN=/usr/bin/java
-          export ANTLR_EXECUTABLE=/usr/local/lib/antlr-${ANTLR_VERSION}-complete.jar
-          sudo cp /usr/local/lib/libantlr4-runtime.so.${ANTLR_VERSION} ${BABELFISH_HOME}/lib
+          export ANTLR_EXECUTABLE=/usr/local/lib/antlr-${{env.ANTLR_VERSION}}-complete.jar
+          sudo cp /usr/local/lib/libantlr4-runtime.so.${{env.ANTLR_VERSION}} ${BABELFISH_HOME}/lib
           cd ${{ github.event.inputs.engine_tag }}/contrib/babelfishpg_tsql/antlr
           cmake -Wno-dev .
           make all
