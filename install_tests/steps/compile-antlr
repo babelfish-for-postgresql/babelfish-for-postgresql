@@ -1,0 +1,7 @@
+#!/bin/sh
+# Generates the make files for the build
+sudo cmake .. -DANTLR_JAR_LOCATION="$EXTENSIONS_SOURCE_CODE_PATH/contrib/babelfishpg_tsql/antlr/thirdparty/antlr/antlr-4.9.2-complete.jar" \
+         -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_DEMO=True
+# Compiles and install
+sudo make
+sudo make install

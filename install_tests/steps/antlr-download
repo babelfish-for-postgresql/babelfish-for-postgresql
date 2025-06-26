@@ -1,0 +1,10 @@
+#!/bin/sh
+# Dowloads the compressed Antlr4 Runtime sources on /opt/antlr4-cpp-runtime-4.9.2-source.zip 
+sudo curl https://www.antlr.org/download/antlr4-cpp-runtime-4.9.2-source.zip \
+  --output /opt/antlr4-cpp-runtime-4.9.2-source.zip 
+
+# Uncompress the source into /opt/antlr4
+sudo unzip -d /opt/antlr4 /opt/antlr4-cpp-runtime-4.9.2-source.zip
+
+sudo mkdir /opt/antlr4/build 
+cd /opt/antlr4/build
