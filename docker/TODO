@@ -1,0 +1,44 @@
+- [ ] ANTLR image split from the Babelfish
+- [x] Multi-stage build
+- [ ] Re-enable Python support (>2.7) in the core configure.
+
+```
+   --with-python PYTHON=/usr/bin/python2.7 \
+```
+
+- [ ] mssql-tools support in non-debian distros
+
+- [ ] Buildx for multi architecture images
+  ## See https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/
+  ## https://dev.to/cloudx/multi-arch-docker-images-the-easy-way-with-github-actions-4k54
+  # docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag 3manuek/babelfishpg:2.1.1-ubuntu.focal .
+
+
+- [ ] Support for armv7. Taken from the current Postgres available packages:
+
+```
+PGXS = /usr/lib/postgresql/11/lib/pgxs/src/makefiles/pgxs.mk
+CONFIGURE = '--build=arm-linux-gnueabihf' '--prefix=/usr' '--includedir=/usr/include' '--mandir=/usr/share/man' '--infodir=/usr/share/info' '--sysconfdir=/etc' '--localstatedir=/var' '--disable-silent-rules' '--libdir=/usr/lib/arm-linux-gnueabihf' '--libexecdir=/usr/lib/arm-linux-gnueabihf' '--disable-maintainer-mode' '--disable-dependency-tracking' '--with-icu' '--with-tcl' '--with-perl' '--with-python' '--with-pam' '--with-openssl' '--with-libxml' '--with-libxslt' 'PYTHON=/usr/bin/python' '--mandir=/usr/share/postgresql/11/man' '--docdir=/usr/share/doc/postgresql-doc-11' '--sysconfdir=/etc/postgresql-common' '--datarootdir=/usr/share/' '--datadir=/usr/share/postgresql/11' '--bindir=/usr/lib/postgresql/11/bin' '--libdir=/usr/lib/arm-linux-gnueabihf/' '--libexecdir=/usr/lib/postgresql/' '--includedir=/usr/include/postgresql/' '--with-extra-version= (Raspbian 11.17-0+deb10u1)' '--enable-nls' '--enable-integer-datetimes' '--enable-thread-safety' '--enable-tap-tests' '--enable-debug' '--enable-dtrace' '--disable-rpath' '--with-uuid=e2fs' '--with-gnu-ld' '--with-pgport=5432' '--with-system-tzdata=/usr/share/zoneinfo' '--with-llvm' '--with-systemd' '--with-selinux' 'MKDIR_P=/bin/mkdir -p' 'TAR=/bin/tar' 'CFLAGS=-g -O2 -fstack-protector-strong -Wformat -Werror=format-security' 'LDFLAGS=-Wl,-z,relro -Wl,-z,now' '--with-gssapi' '--with-ldap' '--with-includes=/usr/include/mit-krb5' '--with-libs=/usr/lib/mit-krb5' '--with-libs=/usr/lib/arm-linux-gnueabihf/mit-krb5' 'build_alias=arm-linux-gnueabihf' 'CPPFLAGS=-Wdate-time -D_FORTIFY_SOURCE=2' 'CXXFLAGS=-g -O2 -fstack-protector-strong -Wformat -Werror=format-security'
+CC = gcc
+CPPFLAGS = -Wdate-time -D_FORTIFY_SOURCE=2 -D_GNU_SOURCE -I/usr/include/libxml2 -I/usr/include/mit-krb5
+CFLAGS = -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard -Wno-format-truncation -Wno-stringop-truncation -g -g -O2 -fstack-protector-strong -Wformat -Werror=format-security
+CFLAGS_SL = -fPIC
+LDFLAGS = -Wl,-z,relro -Wl,-z,now -L/usr/lib/llvm-7/lib -L/usr/lib/arm-linux-gnueabihf/mit-krb5 -Wl,--as-needed
+LDFLAGS_EX = 
+LDFLAGS_SL = 
+LIBS = -lpgcommon -lpgport -lpthread -lselinux -lxslt -lxml2 -lpam -lssl -lcrypto -lgssapi_krb5 -lz -ledit -lrt -lcrypt -ldl -lm 
+VERSION = PostgreSQL 11.17 (Raspbian 11.17-0+deb10u1)
+```
+
+aarch64 does not support uint128. See https://developer.arm.com/documentation/ka004805/1-0/?lang=en
+
+```
+In file included from ../../src/include/port/pg_crc32c.h:36,
+                 from ../../src/include/common/checksum_helper.h:19,
+                 from checksum_helper.c:20:
+../../src/include/port/pg_bswap.h:105:2: error: unknown type name ‘uint128’
+  uint128 v;
+  ^~~~~~~
+../../src/include/port/pg_bswap.h:109:15: error: unknown type name ‘uint128’
+ static inline uint128
+ ```
