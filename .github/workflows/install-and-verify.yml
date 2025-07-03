@@ -33,8 +33,12 @@ jobs:
         if: ${{inputs.file_type == 'tar'}}
         run: tar -xf  ${{ github.event.inputs.engine_tag }}.tar.gz
     
-      - name: Extract version
+      - name: Extract Extension version from Tag
         run: echo "VERSION=$(echo ${{ github.event.inputs.engine_tag }} | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')" >> $GITHUB_ENV
+        shell: bash
+      
+      - name: Extract Engine Version from Tag
+        run: echo "EXPECTED_ENGINE_VERSION=$(echo ${{ github.event.inputs.engine_tag }} | sed -r -e 's/.*__PG_([0-9_]*)$/\1/' -e 's/_/./g')" >> $GITHUB_ENV
         shell: bash
 
       - name: Set Environment Variables
@@ -158,25 +162,47 @@ jobs:
           exit
         shell: bash
 
-      - name: Get Engine Version
-        id: verify-engine
+      - name: Print Extension and Engine Version
+        id: print-version
         if: always() && steps.setup-babelfish-extension.outcome == 'success'
         run: |
-          tsql -H localhost -U babelfish_user -p 1433  -P 12345678 -D master << EOF
+          tsql -H localhost -U babelfish_user -p 1433 -P 12345678 -D master << EOF
           SELECT @@VERSION
           GO
           exit
           EOF
         shell: bash
-      
+
+      - name: Verify Engine Version
+        id: verify-version
+        if: always() && steps.setup-babelfish-extension.outcome == 'success'
+        run: |
+          ENGINE_VERSION=$(tsql -H localhost -U babelfish_user -p 1433 -P 12345678 -D master << EOF | grep -o "PostgreSQL [0-9]\+\.[0-9]\+" | sed 's/PostgreSQL //'
+          SELECT @@VERSION
+          GO
+          exit
+          EOF
+          )
+          if [[ "$ENGINE_VERSION" != "${{env.EXPECTED_ENGINE_VERSION}}" ]]; then
+            echo "Engine version mismatch. Expected: ${{env.EXPECTED_ENGINE_VERSION}}, Found: $ENGINE_VERSION"
+            exit 1
+          fi
+        shell: bash
+
       - name: Verify Babelfish Version
         id: verify-babelfish-version
         if: always() && steps.setup-babelfish-extension.outcome == 'success'
         run: |
-          tsql -H localhost -U babelfish_user -p 1433  -P 12345678 -D master << EOF | grep ${{env.VERSION}} ; echo "result=$?" >> $GITHUB_OUTPUT
+          BABELFISH_VERSION=$(tsql -H localhost -U babelfish_user -p 1433 -P 12345678 -D master << EOF | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+"
           SELECT serverproperty('BabelfishVersion')
           GO
           exit
           EOF
+          )
+          if [[ "$BABELFISH_VERSION" != "${{env.VERSION}}" ]]; then
+            echo "Babelfish version mismatch. Expected: ${{env.VERSION}}, Found: $BABELFISH_VERSION"
+            exit 1
+          fi
+          echo "result=0" >> $GITHUB_OUTPUT
         shell: bash
 
