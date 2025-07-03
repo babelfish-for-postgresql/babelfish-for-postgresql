@@ -1,0 +1,55 @@
+FROM ubuntu:{{ OSVERSION }} as base
+LABEL org.opencontainers.image.authors="emanuel@ongres.com"
+
+ARG MAX_JOBS
+ENV MAX_JOBS=${MAX_JOBS:-2}
+
+ENV ANTLR_VERSION={{ ANTLR_VERSION }}
+ENV ANTLR_RUNTIME=/opt/antlr4
+ENV ANTLR4_RUNTIME_INCLUDE_DIR=/usr/local/include/antlr4-runtime/
+ENV ANTLR4_JAVA_BIN=/usr/bin/java
+
+RUN set -ex; \
+	apt update
+
+RUN set -ex ; \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+    build-essential flex libxml2-dev libxml2-utils\
+    libxslt-dev libssl-dev \
+    libreadline-dev zlib1g-dev libldap2-dev libpam0g-dev gettext  \
+    uuid uuid-dev cmake lld apt-utils pkg-config libossp-uuid-dev gnulib bison git
+
+RUN set -ex ; \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+    xsltproc icu-devtools libicu66 libicu-dev gawk curl
+
+RUN set -ex ; \
+    DEBIAN_FRONTEND=noninteractive \
+    apt install -y openjdk-8-jre openssl \
+        libssl-dev python-dev libpq-dev \
+        pkgconf unzip libutfcpp-dev gnupg
+
+RUN rm -rf /var/lib/apt/lists/*; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false;
+
+
+# Compiling and installing antlr runtime
+ENV ANTLR_EXECUTABLE=/usr/local/lib/antlr-${ANTLR_VERSION}-complete.jar
+# ENV ANTLR_EXECUTABLE=${PG_SRC}/contrib/babelfishpg_tsql/antlr/thirdparty/antlr/antlr-${ANTLR_VERSION}-complete.jar
+
+RUN curl https://www.antlr.org/download/antlr-${ANTLR_VERSION}-complete.jar \
+        --output ${ANTLR_EXECUTABLE} && chmod +x ${ANTLR_EXECUTABLE}
+
+RUN curl https://www.antlr.org/download/antlr4-cpp-runtime-${ANTLR_VERSION}-source.zip \
+        --output /opt/antlr4-cpp-runtime-${ANTLR_VERSION}-source.zip && \
+        unzip -d ${ANTLR_RUNTIME} /opt/antlr4-cpp-runtime-${ANTLR_VERSION}-source.zip
+
+WORKDIR ${ANTLR_RUNTIME}
+
+RUN mkdir build && cd build && \
+    cmake .. -D ANTLR_JAR_LOCATION=${ANTLR_EXECUTABLE} \
+        -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_DEMO=True && \
+    make && make install
+
+# FROM antlr AS base
+# COPY --from=antlr ${PREFIX}/ /usr/local/ /opt/mssql-tools/bin/
