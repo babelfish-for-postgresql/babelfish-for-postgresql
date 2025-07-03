@@ -1,0 +1,65 @@
+
+{{ core-prerequisites }}
+
+RUN mkdir /code
+RUN useradd johndoe
+COPY 'postgresql_modified_for_babelfish' '/code/postgresql_modified_for_babelfish'
+RUN chown -R johndoe:johndoe /code/postgresql_modified_for_babelfish
+WORKDIR /code/postgresql_modified_for_babelfish
+USER johndoe
+
+{{ default-configure }}
+
+{{ preffix-configure }}
+
+ENV INSTALLATION_PATH=/usr/local/pgsql-13.4
+USER root
+{{ installation-path }}
+
+
+{{ own-installation }}
+USER johndoe
+
+{{ compile-core }}
+COPY 'babelfish_extensions' '/code/babelfish_extensions'
+
+USER root
+RUN chown -R johndoe:johndoe '/code/babelfish_extensions'
+
+{{ extension-prerequisites }}
+
+{{ antlr-download }}
+
+ENV EXTENSIONS_SOURCE_CODE_PATH=/code/babelfish_extensions
+
+{{ compile-antlr }}
+
+{{ copy-antlr-runtime }}
+
+ENV PG_CONFIG=/usr/local/pgsql-13.4/bin/pg_config
+ENV PG_SRC=/code/postgresql_modified_for_babelfish
+ENV cmake=/usr/bin/cmake
+
+WORKDIR /code/babelfish_extensions
+
+USER johndoe
+{{ compile-extensions }}
+
+USER root
+{{ data-path }}
+
+{{ add-postgres-user }}
+
+{{ own-postgres-installation }}
+
+{{ init-database }}
+
+RUN echo "listen_addresses = '*'" >> /usr/local/pgsql/data/postgresql.conf
+RUN echo "shared_preload_libraries = 'babelfishpg_tds'" >> /usr/local/pgsql/data/postgresql.conf
+
+EXPOSE 5432
+EXPOSE 1433
+
+WORKDIR /usr/local/pgsql-13.4/
+
+ENTRYPOINT ["/usr/local/pgsql-13.4/bin/postgres", "-D", "/usr/local/pgsql/data"]

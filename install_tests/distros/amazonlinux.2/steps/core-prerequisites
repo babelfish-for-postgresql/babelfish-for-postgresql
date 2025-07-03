@@ -1,0 +1,7 @@
+#!/bin/sh
+sudo yum update -y
+sudo yum install -y gcc gcc-c++ kernel-devel make
+sudo yum install -y bison flex libxml2-devel readline-devel zlib-devel
+sudo yum install -y uuid-devel pkg-config openssl-devel
+sudo yum install -y libicu-devel postgresql-devel perl
+sudo yum install -y shadow-utils wget

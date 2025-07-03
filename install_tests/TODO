@@ -1,0 +1,4 @@
+- [ ] Testing should be using tags and compiling from source code distribution.
+- [ ] Deprecating Python (docker-templater.py) templating by using j2, to match image build and homogenize structure.
+      Or, in any case, use jinja2 parser if sticking to Python.
+- [ ] 
