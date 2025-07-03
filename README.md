@@ -1,6 +1,10 @@
 
 # Babelfish for PostgreSQL
 
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE.Apache2)
+[![License: PostgreSQL](https://img.shields.io/badge/license-PostgreSQL-blue.svg)](LICENSE.PostgreSQL)
+[![Latest release](https://img.shields.io/github/release/babelfish-for-postgresql/babelfish-for-postgresql.svg)](https://github.com/babelfish-for-postgresql/babelfish-for-postgresql/releases)
+
 Babelfish for PostgreSQL is an open-source project that adds a Microsoft
 SQL Server-compatible end-point to PostgreSQL. Babelfish allows PostgreSQL to
 understand T-SQL, SQL Server’s proprietary SQL dialect, and supports the TDS
