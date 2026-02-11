@@ -1,0 +1,5 @@
+#!/bin/sh
+sudo yum install -y java unzip curl git
+sudo yum install -y cmake3 libuuid-devel
+
+ln -s /usr/bin/cmake3 /usr/bin/cmake

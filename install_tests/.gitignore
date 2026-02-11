@@ -1,0 +1,8 @@
+*.out
+babelfish_extensions/
+postgresql_modified_for_babelfish/
+report.md
+compiling-babelfish-from-source.*.md
+Dockerfile
+output/
+tmp/

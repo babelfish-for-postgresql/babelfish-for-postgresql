@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo mkdir -p /usr/local/pgsql/data

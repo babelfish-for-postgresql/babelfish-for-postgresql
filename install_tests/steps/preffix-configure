@@ -1,0 +1,7 @@
+#!/bin/sh
+./configure CFLAGS="-ggdb" \
+  --prefix=/usr/local/pgsql-13.4 \
+  --enable-debug \
+  --with-libxml \
+  --with-uuid=ossp \
+  --with-icu 
