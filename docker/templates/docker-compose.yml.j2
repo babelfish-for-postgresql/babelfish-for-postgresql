@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  babelfishpg-{{ BABELFISH_VERSION }}-{{DISTRO}}-{{OSVERSION}}:
+    container_name: babelfishpg-{{ BABELFISH_VERSION }}-{{ DISTRO }}.{{ OSVERSION }}
+    image: babelfishpg:{{ BABELFISH_VERSION }}-{{ DISTRO }}.{{ OSVERSION}}
+    ports:
+      # Port forwarding not supported by BabelfishPG
+      - 1433:1433
+      - 5432:15432
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - BABELFISH_USER=bbf
+      - BABELFISH_PASS=password
+      - BABELFISH_DB=bbf
+      - BABELFISH_MIGRATION_MODE=multi-db
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    networks:
+      - babelfish
+
+networks:
+  babelfish:
+      

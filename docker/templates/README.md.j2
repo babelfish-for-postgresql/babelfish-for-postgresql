@@ -1,0 +1,13 @@
+# Docker Image run for {{ BABELFISH_VERSION }}-{{DISTRO}}-{{OSVERSION}}
+
+```bash
+docker run -d -i -t  \
+        -e POSTGRES_PASSWORD=password -e POSTGRES_DB=postgres \
+        -e POSTGRES_USER=postgres -e BABELFISH_USER=bbf \
+        -e BABELFISH_PASS=password -e BABELFISH_DB=bbf \
+        -e BABELFISH_MIGRATION_MODE=multi-db \
+        -e POSTGRES_HOST_AUTH_METHOD=trust \
+        -p 1433:1433 -p 5432:15432 \
+        --name babelfishpg-{{ BABELFISH_VERSION }}-{{DISTRO}}.{{OSVERSION}} \
+        babelfishpg-{{ BABELFISH_VERSION }}-{{DISTRO}}.{{OSVERSION}}
+```
