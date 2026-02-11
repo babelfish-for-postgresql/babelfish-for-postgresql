@@ -21,9 +21,10 @@ jobs:
      
     - name: Generate tarballs 
       id: generate-tarballs
+      env:
+        TAG: ${{ github.event.inputs.engine_tag }}
+        EXTTAG: ${{ github.event.inputs.ext_tag }}
       run: |
-        export TAG=${{ github.event.inputs.engine_tag }}
-        export EXTTAG=${{ github.event.inputs.ext_tag }}
         bash ./.github/scripts/build.sh
 
       shell: bash
@@ -69,8 +70,9 @@ jobs:
           name: tar
 
       - name: Release 
+        env:
+          TAG: ${{ github.event.inputs.engine_tag }}
         run: |
-          export TAG=${{ github.event.inputs.engine_tag }}
           export LOC=$(pwd)/
           bash ./.github/scripts/release.sh
         shell: bash

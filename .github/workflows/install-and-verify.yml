@@ -17,6 +17,7 @@ jobs:
       result: ${{ steps.verify-babelfish-version.outputs.result }}
     env:
       JOBS: 4 # Adjust to number of cores
+      ENGINE_TAG: ${{ github.event.inputs.engine_tag }}
     steps:
       - uses: actions/checkout@v4
         id: checkout
@@ -27,25 +28,25 @@ jobs:
 
       - name: Extract from zip
         if: ${{inputs.file_type == 'zip'}}
-        run: unzip ${{ github.event.inputs.engine_tag }}.zip
+        run: unzip "${ENGINE_TAG}.zip"
       
       - name: Extract from tar
         if: ${{inputs.file_type == 'tar'}}
-        run: tar -xf  ${{ github.event.inputs.engine_tag }}.tar.gz
+        run: tar -xf "${ENGINE_TAG}.tar.gz"
     
       - name: Extract Extension version from Tag
-        run: echo "VERSION=$(echo ${{ github.event.inputs.engine_tag }} | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')" >> $GITHUB_ENV
+        run: echo "VERSION=$(echo "${ENGINE_TAG}" | sed -r -e 's/BABEL_([0-9a-z_]*)__PG.*/\1/' -e 's/_/./g')" >> $GITHUB_ENV
         shell: bash
       
       - name: Extract Engine Version from Tag
-        run: echo "EXPECTED_ENGINE_VERSION=$(echo ${{ github.event.inputs.engine_tag }} | sed -r -e 's/.*__PG_([0-9_]*)$/\1/' -e 's/_/./g')" >> $GITHUB_ENV
+        run: echo "EXPECTED_ENGINE_VERSION=$(echo "${ENGINE_TAG}" | sed -r -e 's/.*__PG_([0-9_]*)$/\1/' -e 's/_/./g')" >> $GITHUB_ENV
         shell: bash
 
       - name: Set Environment Variables
         run: |
           echo "BABELFISH_HOME=$(pwd)/babelfish/${{env.VERSION}}"  >> $GITHUB_ENV
           echo "PG_CONFIG=$(pwd)/babelfish/${{env.VERSION}}/bin/pg_config" >> $GITHUB_ENV
-          echo "PG_SRC=$(pwd)/${{ github.event.inputs.engine_tag }}" >> $GITHUB_ENV
+          echo "PG_SRC=$(pwd)/${ENGINE_TAG}" >> $GITHUB_ENV
           echo "MAJOR_VERSION=$(echo ${{env.VERSION}} | cut -d. -f1)" >> $GITHUB_ENV
           echo "MINOR_VERSION=$(echo ${{env.VERSION}} | cut -d. -f2)" >> $GITHUB_ENV
 
@@ -118,7 +119,7 @@ jobs:
           export ANTLR4_JAVA_BIN=/usr/bin/java
           export ANTLR_EXECUTABLE=/usr/local/lib/antlr-${{env.ANTLR_VERSION}}-complete.jar
           sudo cp /usr/local/lib/libantlr4-runtime.so.${{env.ANTLR_VERSION}} ${BABELFISH_HOME}/lib
-          cd ${{ github.event.inputs.engine_tag }}/contrib/babelfishpg_tsql/antlr
+          cd "${ENGINE_TAG}/contrib/babelfishpg_tsql/antlr"
           cmake -Wno-dev .
           make all
         shell: bash
