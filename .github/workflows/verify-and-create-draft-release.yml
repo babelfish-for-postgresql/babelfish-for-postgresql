@@ -55,8 +55,10 @@ jobs:
     needs: [verify_zip, verify_tar]
     if: always() && ${{ needs.verify_zip.outputs.result }} == 0 && ${{ needs.verify_tar.outputs.result }} == 0
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     env:
-      GH_TOKEN: ${{ secrets.RELEASE_PRIVATE_KEY }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v4
